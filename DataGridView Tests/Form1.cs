@@ -15,7 +15,7 @@ namespace DataGridView_Tests
     public partial class Form1 : Form
     {
         private DataGridView _dataGridView;
-        private CustomBindingList _baseObjects;
+        private CustomBindingList<CustomObject> _baseObjects;
         private BindingSource _bindingSource;
         private Random _rand;
         private readonly static string[] NAMES = new string[]{ "Jenny", "Hassid", "Mildred", "James", "Carlos", "Kevin", "Claus" };
@@ -28,7 +28,7 @@ namespace DataGridView_Tests
             _rand = new Random();
             _bindingSource = new BindingSource();
             _dataGridView = new DataGridView();
-            _baseObjects = new CustomBindingList();
+            _baseObjects = new CustomBindingList<CustomObject>();
 
             // Add items to binding source
             _baseObjects.Add(new CustomObject("Mario", 0));
@@ -43,13 +43,18 @@ namespace DataGridView_Tests
             _dataGridView.DataSource = _baseObjects;
             _dataGridView.Dock = DockStyle.Fill;
             _dataGridView.CellPainting += OnPaintCell;
-            _dataGridView.AutoGenerateColumns = false;
-            _dataGridView.Columns.Add("Name", "Name");
+            //_dataGridView.AutoGenerateColumns = false;
+            //_dataGridView.Columns.Add("Name", "Name");
             _dataGridView.ColumnHeadersVisible = false;
             _dataGridView.RowHeadersVisible = false;
-            _dataGridView.SortCompare += OnDataGridViewSort;
+            _dataGridView.BindingContextChanged += OnValidated;
 
             _tableLayoutPanel.Controls.Add(_dataGridView, 0, 0);
+        }
+
+        private void OnValidated(object sender, EventArgs e)
+        {
+            _dataGridView.Columns[1].Visible = false;
         }
 
         private void OnDataGridViewSort(object sender, DataGridViewSortCompareEventArgs e)
@@ -68,7 +73,7 @@ namespace DataGridView_Tests
             if (dgView.Columns[e.ColumnIndex].Name != "Name") return;
 
             // Get value at cell
-            CustomObject obj = _bindingSource[e.RowIndex] as CustomObject;
+            CustomObject obj = _baseObjects[e.RowIndex] as CustomObject;
             Rectangle backgroundRect = e.CellBounds;
             backgroundRect.Inflate(1, 1);
             Brush backgroundBrush = new SolidBrush(GetColorFromNumber(obj.Value));
@@ -117,10 +122,7 @@ namespace DataGridView_Tests
 
         private void _sortButton_Click(object sender, EventArgs e)
         {
-            ((IBindingList)_baseObjects).ApplySort(
-                TypeDescriptor.GetProperties(typeof(CustomObject)).Find("Name", true),
-                ListSortDirection.Ascending);
-            _dataGridView.Refresh();
+            _dataGridView.Sort(_dataGridView.Columns[1], ListSortDirection.Ascending);
         }
     }
 }

@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 
 namespace DataGridView_Tests
 {
-    public class CustomBindingList : BindingList<CustomObject>
+    public class CustomBindingList<T> : BindingList<T>
     {
         protected override bool SupportsSortingCore { get { return true; } }
-        protected override bool SupportsSearchingCore { get { return true; } }
 
         protected override void ApplySortCore(PropertyDescriptor prop, ListSortDirection direction)
         {
@@ -20,7 +19,7 @@ namespace DataGridView_Tests
             if (interfaceType != null)
             {
                 // Sort the list
-                List<CustomObject> unsortedItems = Items as List<CustomObject>;
+                List<T> unsortedItems = Items as List<T>;
                 unsortedItems.Sort();
 
                 // Update the list
